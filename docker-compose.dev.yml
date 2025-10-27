@@ -1,0 +1,42 @@
+# Development Docker Compose for local development
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: pixel-game-db-dev
+    environment:
+      POSTGRES_DB: pixelgame
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - pixel-game-dev-network
+
+  # Frontend Development Server
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: pixel-game-frontend-dev
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    networks:
+      - pixel-game-dev-network
+    environment:
+      - NODE_ENV=development
+
+volumes:
+  postgres_dev_data:
+
+networks:
+  pixel-game-dev-network:
+    driver: bridge
