@@ -14,9 +14,16 @@
     <!-- Text overlay -->
     <div class="text-center relative z-10">
       <div class="title-background">
-        <h1 class="pixel-title text-black text-4xl md:text-5xl lg:text-6xl font-bold tracking-wider">
-          Pixel Game
-        </h1>
+        <div class="flex items-center justify-center gap-4">
+          <img 
+            src="/src/images/logo-icon.png" 
+            alt="Logo Icon" 
+            class="logo-icon animate-bounce-slow w-12 h-12"
+          >
+          <h1 class="pixel-title text-black text-4xl md:text-5xl lg:text-6xl font-bold tracking-wider">
+            Anhelm
+          </h1>
+        </div>
       </div>
     </div>
     
@@ -75,6 +82,15 @@ export default {
   box-shadow: 4px 4px 0px #000000;
   padding: 1rem 2rem;
   display: inline-block;
+}
+
+.logo-icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+  animation: logoFloat 3s ease-in-out infinite;
 }
 
 .pixel-nav {
@@ -289,6 +305,21 @@ export default {
   87% {
     transform: translate(-4px, 4px);
     filter: hue-rotate(240deg);
+  }
+}
+
+@keyframes logoFloat {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-8px) rotate(5deg);
+  }
+  50% {
+    transform: translateY(-4px) rotate(0deg);
+  }
+  75% {
+    transform: translateY(-8px) rotate(-5deg);
   }
 }
 
