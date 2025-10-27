@@ -27,22 +27,37 @@
       </div>
     </div>
     
+    <!-- Character box - centered on page -->
+    <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10">
+      <div class="character-box">
+        <div class="character-content">
+          <div class="character-sprite">
+            <img src="/src/images/pixel_17431878.png" alt="Character" class="character-image">
+          </div>
+          <div class="character-info">
+            <h3 class="character-name">Player</h3>
+            <p class="character-level">Level 1</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    
     <!-- Left center navigation -->
     <nav class="absolute left-6 top-1/2 transform -translate-y-1/2 z-10">
       <div class="nav-background">
         <ul class="space-y-2 p-4">
           <li class="flex items-center">
             <img src="/src/images/right_2885956.png" alt="selected" class="w-6 h-6 mr-2">
-            <router-link to="/" class="pixel-nav text-black hover:text-gray-600 transition-colors duration-200">HOME</router-link>
+            <router-link to="/" @click="playSelectSound" class="pixel-nav text-black hover:text-gray-600 transition-colors duration-200">HOME</router-link>
           </li>
           <li>
-            <router-link to="/play" class="pixel-nav text-black hover:text-gray-600 transition-colors duration-200">PLAY</router-link>
+            <router-link to="/play" @click="playSelectSound" class="pixel-nav text-black hover:text-gray-600 transition-colors duration-200">PLAY</router-link>
           </li>
           <li>
-            <router-link to="/options" class="pixel-nav text-black hover:text-gray-600 transition-colors duration-200">OPTIONS</router-link>
+            <router-link to="/options" @click="playSelectSound" class="pixel-nav text-black hover:text-gray-600 transition-colors duration-200">OPTIONS</router-link>
           </li>
           <li>
-            <router-link to="/settings" class="pixel-nav text-black hover:text-gray-600 transition-colors duration-200">SETTINGS</router-link>
+            <router-link to="/settings" @click="playSelectSound" class="pixel-nav text-black hover:text-gray-600 transition-colors duration-200">SETTINGS</router-link>
           </li>
         </ul>
       </div>
@@ -58,6 +73,13 @@ export default {
   data() {
     return {
       videoSrc: videoSrc
+    }
+  },
+  methods: {
+    playSelectSound() {
+      const audio = new Audio('/src/images/sound/select-sound-121244.mp3')
+      audio.volume = 0.5
+      audio.play().catch(e => console.log('Audio play failed:', e))
     }
   }
 }
@@ -91,6 +113,46 @@ export default {
   image-rendering: -moz-crisp-edges;
   image-rendering: crisp-edges;
   animation: logoFloat 3s ease-in-out infinite;
+}
+
+.character-box {
+  background-color: rgba(255, 255, 255, 0.9);
+  border: 3px solid #000000;
+  border-radius: 8px;
+  box-shadow: 4px 4px 0px #000000;
+  padding: 1rem;
+  display: inline-block;
+}
+
+.character-content {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.character-image {
+  width: 4rem;
+  height: 4rem;
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+}
+
+.character-name {
+  font-family: 'Pixelify Sans', monospace;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #000000;
+  margin: 0;
+  text-shadow: 1px 1px 0px #ffffff;
+}
+
+.character-level {
+  font-family: 'Pixelify Sans', monospace;
+  font-size: 0.9rem;
+  color: #666666;
+  margin: 0;
+  text-shadow: 1px 1px 0px #ffffff;
 }
 
 .pixel-nav {

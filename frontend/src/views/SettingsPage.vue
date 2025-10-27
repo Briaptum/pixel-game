@@ -25,17 +25,17 @@
       <div class="nav-background">
         <ul class="space-y-2 p-4">
           <li>
-            <router-link to="/" class="pixel-nav text-black hover:text-gray-600 transition-colors duration-200">HOME</router-link>
+            <router-link to="/" @click="playSelectSound" class="pixel-nav text-black hover:text-gray-600 transition-colors duration-200">HOME</router-link>
           </li>
           <li>
-            <router-link to="/play" class="pixel-nav text-black hover:text-gray-600 transition-colors duration-200">PLAY</router-link>
+            <router-link to="/play" @click="playSelectSound" class="pixel-nav text-black hover:text-gray-600 transition-colors duration-200">PLAY</router-link>
           </li>
           <li>
-            <router-link to="/options" class="pixel-nav text-black hover:text-gray-600 transition-colors duration-200">OPTIONS</router-link>
+            <router-link to="/options" @click="playSelectSound" class="pixel-nav text-black hover:text-gray-600 transition-colors duration-200">OPTIONS</router-link>
           </li>
           <li class="flex items-center">
             <img src="/src/images/right_2885956.png" alt="selected" class="w-6 h-6 mr-2">
-            <router-link to="/settings" class="pixel-nav text-black hover:text-gray-600 transition-colors duration-200">SETTINGS</router-link>
+            <router-link to="/settings" @click="playSelectSound" class="pixel-nav text-black hover:text-gray-600 transition-colors duration-200">SETTINGS</router-link>
           </li>
         </ul>
       </div>
@@ -51,6 +51,13 @@ export default {
   data() {
     return {
       videoSrc: videoSrc
+    }
+  },
+  methods: {
+    playSelectSound() {
+      const audio = new Audio('/src/images/sound/select-sound-121244.mp3')
+      audio.volume = 0.5
+      audio.play().catch(e => console.log('Audio play failed:', e))
     }
   }
 }
