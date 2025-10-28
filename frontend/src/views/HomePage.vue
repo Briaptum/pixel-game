@@ -27,8 +27,8 @@
       </div>
     </div>
     
-    <!-- Character box - positioned with spacing from title -->
-    <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10 mt-16">
+    <!-- Character box - positioned in center with spacing from header -->
+    <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10 mt-20">
       <div class="character-box">
         <!-- Navigation buttons -->
         <div class="character-navigation">
@@ -42,8 +42,11 @@
         
         <div class="character-content">
           <div class="character-info">
-            <h3 class="character-name">{{ currentCharacter.name }}</h3>
             <div class="character-details">
+              <div class="detail-row">
+                <span class="detail-label">Name:</span>
+                <span class="detail-value character-name">{{ currentCharacter.name }}</span>
+              </div>
               <div class="detail-row">
                 <span class="detail-label">Nationality:</span>
                 <span class="detail-value">{{ currentCharacter.nationality }}</span>
@@ -255,14 +258,15 @@ export default {
 }
 
 .character-box {
-  background-color: rgba(255, 255, 255, 0.9);
-  border: 3px solid #000000;
-  border-radius: 8px;
-  box-shadow: 4px 4px 0px #000000;
-  padding: 1.5rem;
+  background-color: #ffffff;
+  border: 2px solid #000000;
+  border-radius: 4px;
+  padding: 1rem;
   display: inline-block;
-  min-width: 400px;
+  min-width: 320px;
+  max-width: 380px;
   position: relative;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .character-content {
@@ -285,11 +289,9 @@ export default {
 
 .character-name {
   font-family: 'Pixelify Sans', monospace;
-  font-size: 1.6rem;
-  font-weight: 600;
+  font-size: 2rem;
+  font-weight: 800;
   color: #000000;
-  margin: 0 0 1rem 0;
-  text-shadow: 1px 1px 0px #ffffff;
 }
 
 .character-details {
@@ -302,34 +304,39 @@ export default {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  padding: 0.25rem 0;
 }
 
 .backstory-row {
   flex-direction: column;
   align-items: flex-start;
-  gap: 0.25rem;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
+  border-top: 1px solid #e0e0e0;
+  margin-top: 0.5rem;
 }
 
 .detail-label {
   font-family: 'Pixelify Sans', monospace;
-  font-size: 1.1rem;
-  font-weight: 600;
+  font-size: 1.4rem;
+  font-weight: 700;
   color: #000000;
-  text-shadow: 1px 1px 0px #ffffff;
-  min-width: 90px;
+  min-width: 120px;
 }
 
 .detail-value {
   font-family: 'Pixelify Sans', monospace;
-  font-size: 1.1rem;
-  color: #333333;
-  text-shadow: 1px 1px 0px #ffffff;
+  font-size: 1.4rem;
+  color: #000000;
+  font-weight: 600;
 }
 
 .backstory-text {
-  font-size: 1rem;
+  font-size: 1.1rem;
   line-height: 1.4;
-  max-width: 280px;
+  max-width: 250px;
+  color: #000000;
+  font-weight: 500;
 }
 
 .health-display {

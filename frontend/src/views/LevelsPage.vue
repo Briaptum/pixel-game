@@ -14,6 +14,24 @@
       <img src="/src/images/hero-1.png" alt="Hero Character" class="character-sprite">
     </div>
 
+    <!-- Random Decorations -->
+    <div 
+      v-for="(decoration, index) in decorations" 
+      :key="index"
+      class="decoration"
+      :class="decoration.type"
+      :style="{ 
+        left: decoration.x + 'px', 
+        top: decoration.y + 'px'
+      }"
+    >
+      <img 
+        :src="decoration.type === 'tree' ? '/src/images/sound/tree.png' : '/src/images/sound/daisy.png'" 
+        :alt="decoration.type === 'tree' ? 'Tree' : 'Daisy'"
+        class="decoration-image"
+      >
+    </div>
+
     <!-- Controls Info -->
     <div class="controls-info">
       <p>Use WASD to move around</p>
@@ -38,11 +56,15 @@ export default {
       
       // Player Position
       playerX: 400,
-      playerY: 300
+      playerY: 300,
+      
+      // Random Decorations
+      decorations: []
     }
   },
   mounted() {
     this.setupKeyboardControls()
+    this.generateDecorations()
   },
   beforeUnmount() {
     this.cleanupControls()
@@ -60,37 +82,41 @@ export default {
       const maxX = window.innerWidth - characterSize
       const maxY = window.innerHeight - characterSize
       
+      let newX = this.playerX
+      let newY = this.playerY
       let moved = false
       
       switch(event.code) {
         case 'KeyW':
           if (this.playerY > 0) {
-            this.playerY = Math.max(0, this.playerY - moveSpeed)
+            newY = Math.max(0, this.playerY - moveSpeed)
             moved = true
           }
           break
         case 'KeyA':
           if (this.playerX > 0) {
-            this.playerX = Math.max(0, this.playerX - moveSpeed)
+            newX = Math.max(0, this.playerX - moveSpeed)
             moved = true
           }
           break
         case 'KeyS':
           if (this.playerY < maxY) {
-            this.playerY = Math.min(maxY, this.playerY + moveSpeed)
+            newY = Math.min(maxY, this.playerY + moveSpeed)
             moved = true
           }
           break
         case 'KeyD':
           if (this.playerX < maxX) {
-            this.playerX = Math.min(maxX, this.playerX + moveSpeed)
+            newX = Math.min(maxX, this.playerX + moveSpeed)
             moved = true
           }
           break
       }
       
-      // Play move sound if character actually moved
-      if (moved) {
+      // Check for collision with decorations before moving
+      if (moved && !this.checkHeroCollision(newX, newY, characterSize)) {
+        this.playerX = newX
+        this.playerY = newY
         this.playMoveSound()
       }
     },
@@ -107,6 +133,101 @@ export default {
       const audio = new Audio('/src/images/sound/move-sound.mp3')
       audio.volume = 0.3
       audio.play().catch(e => console.log('Audio play failed:', e))
+    },
+    
+    generateDecorations() {
+      const decorations = []
+      const viewportWidth = window.innerWidth
+      const viewportHeight = window.innerHeight
+      
+      // Generate 8-12 trees (bigger decorations)
+      const treeCount = Math.floor(Math.random() * 5) + 8
+      for (let i = 0; i < treeCount; i++) {
+        let attempts = 0
+        let validPosition = false
+        let x, y
+        
+        // Try to find a valid position for the tree
+        while (!validPosition && attempts < 50) {
+          x = Math.random() * (viewportWidth - 120)
+          y = Math.random() * (viewportHeight - 200)
+          
+          // Check collision with existing decorations
+          validPosition = !this.checkCollision(x, y, 100, decorations)
+          attempts++
+        }
+        
+        if (validPosition) {
+          decorations.push({
+            type: 'tree',
+            x: x,
+            y: y
+          })
+        }
+      }
+      
+      // Generate 15-20 daisies (smaller decorations)
+      const daisyCount = Math.floor(Math.random() * 6) + 15
+      for (let i = 0; i < daisyCount; i++) {
+        let attempts = 0
+        let validPosition = false
+        let x, y
+        
+        // Try to find a valid position for the daisy
+        while (!validPosition && attempts < 50) {
+          x = Math.random() * (viewportWidth - 60)
+          y = Math.random() * (viewportHeight - 200)
+          
+          // Check collision with existing decorations
+          validPosition = !this.checkCollision(x, y, 50, decorations)
+          attempts++
+        }
+        
+        if (validPosition) {
+          decorations.push({
+            type: 'daisy',
+            x: x,
+            y: y
+          })
+        }
+      }
+      
+      this.decorations = decorations
+    },
+    
+    checkCollision(x, y, size, existingDecorations) {
+      for (const decoration of existingDecorations) {
+        const decorationSize = decoration.type === 'tree' ? 60 : 30
+        const decorationX = decoration.x
+        const decorationY = decoration.y
+        
+        // Check if rectangles overlap with some padding
+        const padding = 5
+        if (x < decorationX + decorationSize + padding &&
+            x + size + padding > decorationX &&
+            y < decorationY + decorationSize + padding &&
+            y + size + padding > decorationY) {
+          return true
+        }
+      }
+      return false
+    },
+    
+    checkHeroCollision(newX, newY, heroSize) {
+      for (const decoration of this.decorations) {
+        const decorationSize = decoration.type === 'tree' ? 60 : 30
+        const decorationX = decoration.x
+        const decorationY = decoration.y
+        
+        // Check if hero would collide with decoration
+        if (newX < decorationX + decorationSize &&
+            newX + heroSize > decorationX &&
+            newY < decorationY + decorationSize &&
+            newY + heroSize > decorationY) {
+          return true
+        }
+      }
+      return false
     }
   }
 }
@@ -214,6 +335,32 @@ export default {
   font-weight: 600;
   margin: 0;
   text-shadow: 1px 1px 0px #000000;
+}
+
+/* Decorations */
+.decoration {
+  position: absolute;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.decoration.tree {
+  width: 100px;
+  height: 100px;
+}
+
+.decoration.daisy {
+  width: 50px;
+  height: 50px;
+}
+
+.decoration-image {
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+  opacity: 0.8;
 }
 
 /* Ensure pixelated rendering */
