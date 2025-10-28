@@ -128,6 +128,12 @@ export default {
     this.setupKeyboardControls()
     this.generateDecorations()
     this.generateStars()
+    
+    // Find a safe spawn position after decorations are generated
+    const safePosition = this.findSafeSpawnPosition()
+    this.playerX = safePosition.x
+    this.playerY = safePosition.y
+    
     this.startTimer()
   },
   beforeUnmount() {
@@ -266,7 +272,7 @@ export default {
     
     checkCollision(x, y, size, existingDecorations) {
       for (const decoration of existingDecorations) {
-        const decorationSize = decoration.type === 'tree' ? 40 : 25
+        const decorationSize = decoration.type === 'tree' ? 40 : 15
         const decorationX = decoration.x
         const decorationY = decoration.y
         
@@ -284,7 +290,7 @@ export default {
     
     checkHeroCollision(newX, newY, heroSize) {
       for (const decoration of this.decorations) {
-        const decorationSize = decoration.type === 'tree' ? 40 : 25
+        const decorationSize = decoration.type === 'tree' ? 40 : 15
         const decorationX = decoration.x
         const decorationY = decoration.y
         
@@ -331,10 +337,38 @@ export default {
       this.stars = stars
     },
     
+    findSafeSpawnPosition() {
+      const viewportWidth = window.innerWidth
+      const viewportHeight = window.innerHeight
+      const heroSize = 80
+      
+      let attempts = 0
+      let validPosition = false
+      let x, y
+      
+      // Try to find a safe spawn position for the player
+      while (!validPosition && attempts < 100) {
+        x = Math.random() * (viewportWidth - heroSize)
+        y = Math.random() * (viewportHeight - 200) // Leave space for UI
+        
+        // Check if this position would collide with any decorations
+        validPosition = !this.checkHeroCollision(x, y, heroSize)
+        attempts++
+      }
+      
+      // If we couldn't find a safe position, use center as fallback
+      if (!validPosition) {
+        x = viewportWidth / 2 - heroSize / 2
+        y = viewportHeight / 2 - heroSize / 2
+      }
+      
+      return { x, y }
+    },
+    
     checkStarCollision(x, y, size, existingStars) {
       // Check collision with decorations
       for (const decoration of this.decorations) {
-        const decorationSize = decoration.type === 'tree' ? 40 : 25
+        const decorationSize = decoration.type === 'tree' ? 40 : 15
         const decorationX = decoration.x
         const decorationY = decoration.y
         
@@ -397,14 +431,19 @@ export default {
     
     restartGame() {
       this.collectedStars = 0
-      this.stars.forEach(star => {
-        star.collected = false
-      })
-      this.playerX = 400
-      this.playerY = 300
       this.gameOver = false
       this.timeLeft = 30
       this.clearTimer()
+      
+      // Regenerate decorations and stars for a fresh game
+      this.generateDecorations()
+      this.generateStars()
+      
+      // Find a safe spawn position after decorations are generated
+      const safePosition = this.findSafeSpawnPosition()
+      this.playerX = safePosition.x
+      this.playerY = safePosition.y
+      
       this.startTimer()
     },
     
@@ -604,8 +643,8 @@ export default {
 }
 
 .decoration.daisy {
-  width: 50px;
-  height: 50px;
+  width: 30px;
+  height: 30px;
 }
 
 .decoration-image {
