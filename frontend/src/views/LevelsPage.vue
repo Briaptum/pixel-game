@@ -379,6 +379,11 @@ export default {
             star.collected = true
             this.collectedStars++
             this.playStarSound()
+            
+            // Check if all stars are collected
+            if (this.collectedStars >= 5) {
+              this.clearTimer()
+            }
           }
         }
       }
