@@ -12,6 +12,9 @@
       <div class="timer-display">
         <span class="timer-text">Time: {{ timeLeft }}s</span>
       </div>
+      <div class="speed-display">
+        <span class="speed-text">Speed: {{ playerSpeed }}</span>
+      </div>
       <button @click="goHome" class="home-button">HOME</button>
     </div>
 
@@ -56,6 +59,21 @@
       >
     </div>
 
+    <!-- Monster -->
+    <div 
+      class="monster"
+      :style="{ 
+        left: monsterX + 'px', 
+        top: monsterY + 'px'
+      }"
+    >
+      <img 
+        src="/src/images/monster.png" 
+        alt="Monster"
+        class="monster-image"
+      >
+    </div>
+
     <!-- Controls Info -->
     <div class="controls-info">
       <p>Use WASD to move around</p>
@@ -74,9 +92,11 @@
     <!-- Game Over Box -->
     <div v-if="gameOver" class="congratulations-overlay">
       <div class="game-over-box">
-        <h2>⏰ Time's Up! ⏰</h2>
+        <h2 v-if="caughtByMonster">👹 You have been caught! 👹</h2>
+        <h2 v-else>⏰ Time's Up! ⏰</h2>
         <p>You collected {{ collectedStars }}/5 stars</p>
-        <p>Try again to collect all stars in 30 seconds!</p>
+        <p v-if="!caughtByMonster">Try again to collect all stars in 1 minute!</p>
+        <p v-else>The monster caught you! Try to avoid it next time!</p>
         <button @click="restartGame" class="restart-button">Try Again</button>
         <button @click="goHome" class="home-button">Home</button>
       </div>
@@ -102,6 +122,7 @@ export default {
       // Player Position
       playerX: 400,
       playerY: 300,
+      playerSpeed: 20, // Base movement speed
       
       // Random Decorations
       decorations: [],
@@ -110,9 +131,17 @@ export default {
       stars: [],
       collectedStars: 0,
       
+      // Monster
+      monsterX: 0,
+      monsterY: 0,
+      monsterSpeed: 1,
+      monsterDirection: { x: 1, y: 1 },
+      monsterInterval: null,
+      
       // Timer
-      timeLeft: 30,
+      timeLeft: 60,
       gameOver: false,
+      caughtByMonster: false,
       timerInterval: null
     }
   },
@@ -134,11 +163,16 @@ export default {
     this.playerX = safePosition.x
     this.playerY = safePosition.y
     
+    // Initialize monster position
+    this.initializeMonster()
+    
     this.startTimer()
+    this.startMonsterMovement()
   },
   beforeUnmount() {
     this.cleanupControls()
     this.clearTimer()
+    this.clearMonsterMovement()
   },
   methods: {
     setupKeyboardControls() {
@@ -149,7 +183,7 @@ export default {
       // Don't allow movement if game has ended
       if (this.gameEnded) return
       
-      const moveSpeed = 20
+      const moveSpeed = this.playerSpeed
       const characterSize = 80
       
       // Allow movement across the entire page
@@ -414,6 +448,9 @@ export default {
             this.collectedStars++
             this.playStarSound()
             
+            // Increase player speed for each star collected
+            this.playerSpeed += 5 // Increase speed by 5 pixels per star
+            
             // Check if all stars are collected
             if (this.collectedStars >= 5) {
               this.clearTimer()
@@ -431,8 +468,10 @@ export default {
     
     restartGame() {
       this.collectedStars = 0
+      this.playerSpeed = 20 // Reset to base speed
       this.gameOver = false
-      this.timeLeft = 30
+      this.caughtByMonster = false
+      this.timeLeft = 60
       this.clearTimer()
       
       // Regenerate decorations and stars for a fresh game
@@ -444,7 +483,94 @@ export default {
       this.playerX = safePosition.x
       this.playerY = safePosition.y
       
+      // Initialize monster position
+      this.initializeMonster()
+      
       this.startTimer()
+      this.startMonsterMovement()
+    },
+    
+    initializeMonster() {
+      const viewportWidth = window.innerWidth
+      const viewportHeight = window.innerHeight
+      const monsterSize = 60
+      
+      // Reset monster speed to base value
+      this.monsterSpeed = 1
+      
+      // Place monster at a random position
+      this.monsterX = Math.random() * (viewportWidth - monsterSize)
+      this.monsterY = Math.random() * (viewportHeight - 200) // Leave space for UI
+      
+      // Random direction
+      this.monsterDirection = {
+        x: Math.random() > 0.5 ? 1 : -1,
+        y: Math.random() > 0.5 ? 1 : -1
+      }
+    },
+    
+    startMonsterMovement() {
+      this.monsterInterval = setInterval(() => {
+        if (!this.gameEnded) {
+          this.moveMonster()
+        }
+      }, 50) // Move every 50ms for smooth movement
+    },
+    
+    clearMonsterMovement() {
+      if (this.monsterInterval) {
+        clearInterval(this.monsterInterval)
+        this.monsterInterval = null
+      }
+    },
+    
+    moveMonster() {
+      const viewportWidth = window.innerWidth
+      const viewportHeight = window.innerHeight
+      const monsterSize = 60
+      
+      // Calculate direction to player
+      const deltaX = this.playerX - this.monsterX
+      const deltaY = this.playerY - this.monsterY
+      
+      // Normalize direction (make it a unit vector)
+      const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY)
+      if (distance > 0) {
+        const normalizedX = deltaX / distance
+        const normalizedY = deltaY / distance
+        
+        // Move monster towards player
+        this.monsterX += normalizedX * this.monsterSpeed
+        this.monsterY += normalizedY * this.monsterSpeed
+      }
+      
+      // Keep monster in bounds
+      this.monsterX = Math.max(0, Math.min(viewportWidth - monsterSize, this.monsterX))
+      this.monsterY = Math.max(0, Math.min(viewportHeight - 200, this.monsterY))
+      
+      // Check collision with player
+      this.checkMonsterCollision()
+    },
+    
+    checkMonsterCollision() {
+      const heroSize = 80
+      const monsterSize = 60
+      
+      const heroX = this.playerX
+      const heroY = this.playerY
+      const monsterX = this.monsterX
+      const monsterY = this.monsterY
+      
+      // Check if hero is touching the monster
+      if (heroX < monsterX + monsterSize &&
+          heroX + heroSize > monsterX &&
+          heroY < monsterY + monsterSize &&
+          heroY + heroSize > monsterY) {
+        
+        // Player caught by monster - game over
+        this.caughtByMonster = true
+        this.endGame()
+      }
     },
     
     startTimer() {
@@ -543,6 +669,20 @@ export default {
 
 .timer-text {
   color: #ffa500;
+  font-size: 1.2rem;
+  font-weight: 600;
+  text-shadow: 1px 1px 0px #000000;
+}
+
+.speed-display {
+  background: rgba(0, 191, 255, 0.2);
+  border: 2px solid #00bfff;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+}
+
+.speed-text {
+  color: #00bfff;
   font-size: 1.2rem;
   font-weight: 600;
   text-shadow: 1px 1px 0px #000000;
@@ -667,6 +807,23 @@ export default {
 }
 
 .star-image {
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+}
+
+/* Monster */
+.monster {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  z-index: 8;
+  pointer-events: none;
+}
+
+.monster-image {
   width: 100%;
   height: 100%;
   image-rendering: pixelated;
