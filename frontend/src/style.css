@@ -10,3 +10,22 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+/* Global custom cursor for entire website - multiple fallbacks */
+html, body, * {
+  cursor: url('/pointer-icon.png'), url('/pointer-icon.png') 16 16, auto !important;
+}
+
+/* Try different approaches */
+html {
+  cursor: url('/pointer-icon.png') 16 16, pointer !important;
+}
+
+body {
+  cursor: url('/pointer-icon.png') 16 16, pointer !important;
+}
+
+/* Force on specific elements */
+a, button, input, textarea, select, div, span, p, h1, h2, h3, h4, h5, h6, img, video, canvas, nav, ul, li {
+  cursor: url('/pointer-icon.png') 16 16, pointer !important;
+}

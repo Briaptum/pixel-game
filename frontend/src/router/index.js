@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomePage from '../views/HomePage.vue'
 import PlayPage from '../views/PlayPage.vue'
+import LevelsPage from '../views/LevelsPage.vue'
 import OptionsPage from '../views/OptionsPage.vue'
 import SettingsPage from '../views/SettingsPage.vue'
 
@@ -14,6 +15,11 @@ const routes = [
     path: '/play',
     name: 'Play',
     component: PlayPage
+  },
+  {
+    path: '/levels',
+    name: 'Levels',
+    component: LevelsPage
   },
   {
     path: '/options',
