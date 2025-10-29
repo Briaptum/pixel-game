@@ -33,7 +33,7 @@
             <div class="level-number-simple">{{ level.number }}</div>
             <div class="level-name-simple">{{ level.name }}</div>
             <div v-if="selectedLevelIndex === index" class="level-selected-indicator">
-              <img src="/src/images/right_2885956.png" alt="Selected" class="selected-icon">
+              <img src="/src/icons/right.png" alt="Selected" class="selected-icon">
             </div>
           </div>
         </div>
@@ -55,7 +55,7 @@
             <router-link to="/" @click="playSelectSound" class="pixel-nav text-black hover:text-gray-600 transition-colors duration-200">HOME</router-link>
           </li>
           <li class="flex items-center">
-            <img src="/src/images/right_2885956.png" alt="selected" class="w-6 h-6 mr-2">
+            <img src="/src/icons/right.png" alt="selected" class="w-6 h-6 mr-2">
             <router-link to="/play" @click="playSelectSound" class="pixel-nav text-black hover:text-gray-600 transition-colors duration-200">PLAY</router-link>
           </li>
           <li>
@@ -115,17 +115,17 @@ export default {
   },
   methods: {
     playSelectSound() {
-      const audio = new Audio('/src/images/sound/select-sound-121244.mp3')
+      const audio = new Audio('/src/sound/menu-click-89198.mp3')
       audio.volume = 0.5
       audio.play().catch(e => console.log('Audio play failed:', e))
     },
     playClickSound() {
-      const audio = new Audio('/src/images/sound/ui-button-click-4-284571.mp3')
+      const audio = new Audio('/src/sound/pop.mp3')
       audio.volume = 0.3
       audio.play().catch(e => console.log('Audio play failed:', e))
     },
     playSuccessSound() {
-      const audio = new Audio('/src/images/sound/success.mp3')
+      const audio = new Audio('/src/sound/success.mp3')
       audio.volume = 0.5
       audio.play().catch(e => console.log('Audio play failed:', e))
     },

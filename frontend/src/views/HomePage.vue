@@ -16,7 +16,7 @@
       <div class="title-background">
         <div class="flex items-center justify-center gap-4">
           <img 
-            src="/src/images/logo-icon.png" 
+            src="/src/icons/logo-icon.png" 
             alt="Logo Icon" 
             class="logo-icon animate-bounce-slow w-12 h-12"
           >
@@ -58,7 +58,7 @@
               <div class="detail-row">
                 <span class="detail-label">Health:</span>
                 <div class="health-display">
-                  <img v-for="heart in currentCharacter.health" :key="heart" src="/src/images/heart_18295279.png" alt="Health" class="health-icon">
+                  <img v-for="heart in currentCharacter.health" :key="heart" src="/src/icons/heart.png" alt="Health" class="health-icon">
                 </div>
               </div>
               <div class="detail-row backstory-row">
@@ -111,7 +111,7 @@
       <div class="nav-background">
         <ul class="space-y-2 p-4">
           <li class="flex items-center">
-            <img src="/src/images/right_2885956.png" alt="selected" class="w-6 h-6 mr-2">
+            <img src="/src/icons/right.png" alt="selected" class="w-6 h-6 mr-2">
             <router-link to="/" @click="playSelectSound" class="pixel-nav text-black hover:text-gray-600 transition-colors duration-200">HOME</router-link>
           </li>
           <li>
@@ -185,17 +185,17 @@ export default {
   },
   methods: {
     playSelectSound() {
-      const audio = new Audio('/src/images/sound/select-sound-121244.mp3')
+      const audio = new Audio('/src/sound/menu-click-89198.mp3')
       audio.volume = 0.5
       audio.play().catch(e => console.log('Audio play failed:', e))
     },
     playClickSound() {
-      const audio = new Audio('/src/images/sound/ui-button-click-4-284571.mp3')
+      const audio = new Audio('/src/sound/pop.mp3')
       audio.volume = 0.3
       audio.play().catch(e => console.log('Audio play failed:', e))
     },
     playSuccessSound() {
-      const audio = new Audio('/src/images/sound/success.mp3')
+      const audio = new Audio('/src/sound/success.mp3')
       audio.volume = 0.5
       audio.play().catch(e => console.log('Audio play failed:', e))
     },

@@ -6,21 +6,12 @@
         <h2>{{ selectedCharacter.name }}</h2>
         <p>{{ selectedCharacter.nationality }} • Age {{ selectedCharacter.age }}</p>
       </div>
-      <div class="score-display">
-        <span class="score-text">Stars: {{ collectedStars }}/5</span>
-      </div>
-      <div class="timer-display">
-        <span class="timer-text">Time: {{ timeLeft }}s</span>
-      </div>
-      <div class="speed-display">
-        <span class="speed-text">Speed: {{ playerSpeed }}</span>
-      </div>
       <button @click="goHome" class="home-button">HOME</button>
     </div>
 
     <!-- Character -->
     <div class="movable-character" :style="{ left: playerX + 'px', top: playerY + 'px' }">
-      <img src="/src/images/hero-1.png" alt="Hero Character" class="character-sprite">
+      <img src="/src/icons/hero-1.png" alt="Hero Character" class="character-sprite">
     </div>
 
     <!-- Random Decorations -->
@@ -35,72 +26,19 @@
       }"
     >
       <img 
-        :src="decoration.type === 'tree' ? '/src/images/sound/tree.png' : '/src/images/sound/daisy.png'" 
+        :src="decoration.type === 'tree' ? '/src/icons/tree.png' : '/src/icons/daisy.png'" 
         :alt="decoration.type === 'tree' ? 'Tree' : 'Daisy'"
         class="decoration-image"
       >
     </div>
 
-    <!-- Collectible Stars -->
-    <div 
-      v-for="(star, index) in stars" 
-      :key="'star-' + index"
-      v-show="!star.collected"
-      class="star"
-      :style="{ 
-        left: star.x + 'px', 
-        top: star.y + 'px'
-      }"
-    >
-      <img 
-        src="/src/images/sound/star.png" 
-        alt="Star"
-        class="star-image"
-      >
-    </div>
 
-    <!-- Monster -->
-    <div 
-      class="monster"
-      :style="{ 
-        left: monsterX + 'px', 
-        top: monsterY + 'px'
-      }"
-    >
-      <img 
-        src="/src/images/monster.png" 
-        alt="Monster"
-        class="monster-image"
-      >
-    </div>
 
     <!-- Controls Info -->
     <div class="controls-info">
       <p>Use WASD to move around</p>
     </div>
 
-    <!-- Congratulations Box -->
-    <div v-if="allStarsCollected" class="congratulations-overlay">
-      <div class="congratulations-box">
-        <h2>🎉 Congratulations! 🎉</h2>
-        <p>You collected all 5 stars!</p>
-        <button @click="restartGame" class="restart-button">Play Again</button>
-        <button @click="goHome" class="home-button">Home</button>
-      </div>
-    </div>
-
-    <!-- Game Over Box -->
-    <div v-if="gameOver" class="congratulations-overlay">
-      <div class="game-over-box">
-        <h2 v-if="caughtByMonster">👹 You have been caught! 👹</h2>
-        <h2 v-else>⏰ Time's Up! ⏰</h2>
-        <p>You collected {{ collectedStars }}/5 stars</p>
-        <p v-if="!caughtByMonster">Try again to collect all stars in 1 minute!</p>
-        <p v-else>The monster caught you! Try to avoid it next time!</p>
-        <button @click="restartGame" class="restart-button">Try Again</button>
-        <button @click="goHome" class="home-button">Home</button>
-      </div>
-    </div>
   </div>
 </template>
 
@@ -125,54 +63,20 @@ export default {
       playerSpeed: 20, // Base movement speed
       
       // Random Decorations
-      decorations: [],
-      
-      // Collectible Stars
-      stars: [],
-      collectedStars: 0,
-      
-      // Monster
-      monsterX: 0,
-      monsterY: 0,
-      monsterSpeed: 1,
-      monsterDirection: { x: 1, y: 1 },
-      monsterInterval: null,
-      
-      // Timer
-      timeLeft: 60,
-      gameOver: false,
-      caughtByMonster: false,
-      timerInterval: null
-    }
-  },
-  computed: {
-    allStarsCollected() {
-      return this.collectedStars >= 5
-    },
-    gameEnded() {
-      return this.gameOver || this.allStarsCollected
+      decorations: []
     }
   },
   mounted() {
     this.setupKeyboardControls()
     this.generateDecorations()
-    this.generateStars()
     
     // Find a safe spawn position after decorations are generated
     const safePosition = this.findSafeSpawnPosition()
     this.playerX = safePosition.x
     this.playerY = safePosition.y
-    
-    // Initialize monster position
-    this.initializeMonster()
-    
-    this.startTimer()
-    this.startMonsterMovement()
   },
   beforeUnmount() {
     this.cleanupControls()
-    this.clearTimer()
-    this.clearMonsterMovement()
   },
   methods: {
     setupKeyboardControls() {
@@ -180,9 +84,6 @@ export default {
     },
     
     handleKeyPress(event) {
-      // Don't allow movement if game has ended
-      if (this.gameEnded) return
-      
       const moveSpeed = this.playerSpeed
       const characterSize = 80
       
@@ -226,7 +127,6 @@ export default {
         this.playerX = newX
         this.playerY = newY
         this.playMoveSound()
-        this.checkStarCollection()
       }
     },
     
@@ -239,7 +139,7 @@ export default {
     },
     
     playMoveSound() {
-      const audio = new Audio('/src/images/sound/move-sound.mp3')
+      const audio = new Audio('/src/sound/walk.mp3')
       audio.volume = 0.3
       audio.play().catch(e => console.log('Audio play failed:', e))
     },
@@ -339,38 +239,6 @@ export default {
       return false
     },
     
-    generateStars() {
-      const stars = []
-      const viewportWidth = window.innerWidth
-      const viewportHeight = window.innerHeight
-      
-      // Generate exactly 5 stars
-      for (let i = 0; i < 5; i++) {
-        let attempts = 0
-        let validPosition = false
-        let x, y
-        
-        // Try to find a valid position for the star
-        while (!validPosition && attempts < 50) {
-          x = Math.random() * (viewportWidth - 40)
-          y = Math.random() * (viewportHeight - 200)
-          
-          // Check collision with decorations and other stars
-          validPosition = !this.checkStarCollision(x, y, 30, stars)
-        }
-        
-        if (validPosition) {
-          stars.push({
-            x: x,
-            y: y,
-            collected: false
-          })
-        }
-      }
-      
-      this.stars = stars
-    },
-    
     findSafeSpawnPosition() {
       const viewportWidth = window.innerWidth
       const viewportHeight = window.innerHeight
@@ -397,228 +265,6 @@ export default {
       }
       
       return { x, y }
-    },
-    
-    checkStarCollision(x, y, size, existingStars) {
-      // Check collision with decorations
-      for (const decoration of this.decorations) {
-        const decorationSize = decoration.type === 'tree' ? 40 : 15
-        const decorationX = decoration.x
-        const decorationY = decoration.y
-        
-        if (x < decorationX + decorationSize &&
-            x + size > decorationX &&
-            y < decorationY + decorationSize &&
-            y + size > decorationY) {
-          return true
-        }
-      }
-      
-      // Check collision with other stars
-      for (const star of existingStars) {
-        if (x < star.x + 30 &&
-            x + size > star.x &&
-            y < star.y + 30 &&
-            y + size > star.y) {
-          return true
-        }
-      }
-      
-      return false
-    },
-    
-    checkStarCollection() {
-      const heroSize = 80
-      const heroX = this.playerX
-      const heroY = this.playerY
-      
-      for (let i = 0; i < this.stars.length; i++) {
-        const star = this.stars[i]
-        if (!star.collected) {
-          const starSize = 30
-          
-          // Check if hero is touching the star
-          if (heroX < star.x + starSize &&
-              heroX + heroSize > star.x &&
-              heroY < star.y + starSize &&
-              heroY + heroSize > star.y) {
-            
-            // Collect the star
-            star.collected = true
-            this.collectedStars++
-            this.playStarSound()
-            
-            // Increase player speed for each star collected
-            this.playerSpeed += 5 // Increase speed by 5 pixels per star
-            
-            // Check if all stars are collected
-            if (this.collectedStars >= 5) {
-              this.clearTimer()
-            }
-          }
-        }
-      }
-    },
-    
-    playStarSound() {
-      const audio = new Audio('/src/images/sound/success.mp3')
-      audio.volume = 0.5
-      audio.play().catch(e => console.log('Audio play failed:', e))
-    },
-    
-    restartGame() {
-      this.collectedStars = 0
-      this.playerSpeed = 20 // Reset to base speed
-      this.gameOver = false
-      this.caughtByMonster = false
-      this.timeLeft = 60
-      this.clearTimer()
-      
-      // Regenerate decorations and stars for a fresh game
-      this.generateDecorations()
-      this.generateStars()
-      
-      // Find a safe spawn position after decorations are generated
-      const safePosition = this.findSafeSpawnPosition()
-      this.playerX = safePosition.x
-      this.playerY = safePosition.y
-      
-      // Initialize monster position
-      this.initializeMonster()
-      
-      this.startTimer()
-      this.startMonsterMovement()
-    },
-    
-    initializeMonster() {
-      const viewportWidth = window.innerWidth
-      const viewportHeight = window.innerHeight
-      const monsterSize = 60
-      
-      // Reset monster speed to base value
-      this.monsterSpeed = 1
-      
-      // Place monster at a random position
-      this.monsterX = Math.random() * (viewportWidth - monsterSize)
-      this.monsterY = Math.random() * (viewportHeight - 200) // Leave space for UI
-      
-      // Random direction
-      this.monsterDirection = {
-        x: Math.random() > 0.5 ? 1 : -1,
-        y: Math.random() > 0.5 ? 1 : -1
-      }
-    },
-    
-    startMonsterMovement() {
-      this.monsterInterval = setInterval(() => {
-        if (!this.gameEnded) {
-          this.moveMonster()
-        }
-      }, 50) // Move every 50ms for smooth movement
-    },
-    
-    clearMonsterMovement() {
-      if (this.monsterInterval) {
-        clearInterval(this.monsterInterval)
-        this.monsterInterval = null
-      }
-    },
-    
-    moveMonster() {
-      const viewportWidth = window.innerWidth
-      const viewportHeight = window.innerHeight
-      const monsterSize = 60
-      
-      // Calculate direction to player
-      const deltaX = this.playerX - this.monsterX
-      const deltaY = this.playerY - this.monsterY
-      
-      // Normalize direction (make it a unit vector)
-      const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY)
-      if (distance > 0) {
-        const normalizedX = deltaX / distance
-        const normalizedY = deltaY / distance
-        
-        // Move monster towards player
-        this.monsterX += normalizedX * this.monsterSpeed
-        this.monsterY += normalizedY * this.monsterSpeed
-      }
-      
-      // Keep monster in bounds
-      this.monsterX = Math.max(0, Math.min(viewportWidth - monsterSize, this.monsterX))
-      this.monsterY = Math.max(0, Math.min(viewportHeight - 200, this.monsterY))
-      
-      // Check collision with player
-      this.checkMonsterCollision()
-    },
-    
-    checkMonsterCollision() {
-      const heroSize = 80
-      const monsterSize = 60
-      
-      const heroX = this.playerX
-      const heroY = this.playerY
-      const monsterX = this.monsterX
-      const monsterY = this.monsterY
-      
-      // Check if hero is touching the monster
-      if (heroX < monsterX + monsterSize &&
-          heroX + heroSize > monsterX &&
-          heroY < monsterY + monsterSize &&
-          heroY + heroSize > monsterY) {
-        
-        // Player caught by monster - game over
-        this.caughtByMonster = true
-        this.endGame()
-      }
-    },
-    
-    startTimer() {
-      this.timerInterval = setInterval(() => {
-        if (this.timeLeft > 0) {
-          this.timeLeft--
-          
-          // Play warning sounds
-          if (this.timeLeft === 10) {
-            this.playWarningSound()
-          } else if (this.timeLeft <= 5 && this.timeLeft > 0) {
-            this.playTickSound()
-          }
-        } else {
-          this.endGame()
-        }
-      }, 1000)
-    },
-    
-    clearTimer() {
-      if (this.timerInterval) {
-        clearInterval(this.timerInterval)
-        this.timerInterval = null
-      }
-    },
-    
-    endGame() {
-      this.gameOver = true
-      this.clearTimer()
-      this.playGameOverSound()
-    },
-    
-    playWarningSound() {
-      const audio = new Audio('/src/images/sound/interface-soft-click-131438.mp3')
-      audio.volume = 0.4
-      audio.play().catch(e => console.log('Audio play failed:', e))
-    },
-    
-    playTickSound() {
-      const audio = new Audio('/src/images/sound/ui-button-click-4-284571.mp3')
-      audio.volume = 0.3
-      audio.play().catch(e => console.log('Audio play failed:', e))
-    },
-    
-    playGameOverSound() {
-      const audio = new Audio('/src/images/sound/fail-234710.mp3')
-      audio.volume = 0.6
-      audio.play().catch(e => console.log('Audio play failed:', e))
     }
   }
 }
@@ -646,47 +292,6 @@ export default {
   align-items: center;
 }
 
-.score-display {
-  background: rgba(0, 255, 0, 0.2);
-  border: 2px solid #00ff00;
-  border-radius: 8px;
-  padding: 0.5rem 1rem;
-}
-
-.score-text {
-  color: #00ff00;
-  font-size: 1.2rem;
-  font-weight: 600;
-  text-shadow: 1px 1px 0px #000000;
-}
-
-.timer-display {
-  background: rgba(255, 165, 0, 0.2);
-  border: 2px solid #ffa500;
-  border-radius: 8px;
-  padding: 0.5rem 1rem;
-}
-
-.timer-text {
-  color: #ffa500;
-  font-size: 1.2rem;
-  font-weight: 600;
-  text-shadow: 1px 1px 0px #000000;
-}
-
-.speed-display {
-  background: rgba(0, 191, 255, 0.2);
-  border: 2px solid #00bfff;
-  border-radius: 8px;
-  padding: 0.5rem 1rem;
-}
-
-.speed-text {
-  color: #00bfff;
-  font-size: 1.2rem;
-  font-weight: 600;
-  text-shadow: 1px 1px 0px #000000;
-}
 
 .character-details {
   text-align: left;
@@ -733,7 +338,7 @@ export default {
 }
 
 .game-container {
-  background-image: url('/src/images/background-box.jpg');
+  background-image: url('/src/icons/background-box.jpg');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -796,147 +401,6 @@ export default {
   opacity: 0.8;
 }
 
-/* Stars */
-.star {
-  position: absolute;
-  width: 30px;
-  height: 30px;
-  z-index: 5;
-  pointer-events: none;
-  animation: twinkle 2s ease-in-out infinite alternate;
-}
-
-.star-image {
-  width: 100%;
-  height: 100%;
-  image-rendering: pixelated;
-  image-rendering: -moz-crisp-edges;
-  image-rendering: crisp-edges;
-}
-
-/* Monster */
-.monster {
-  position: absolute;
-  width: 60px;
-  height: 60px;
-  z-index: 8;
-  pointer-events: none;
-}
-
-.monster-image {
-  width: 100%;
-  height: 100%;
-  image-rendering: pixelated;
-  image-rendering: -moz-crisp-edges;
-  image-rendering: crisp-edges;
-}
-
-@keyframes twinkle {
-  0% {
-    opacity: 0.7;
-    transform: scale(1);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1.1);
-  }
-}
-
-/* Congratulations Box */
-.congratulations-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: rgba(0, 0, 0, 0.8);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
-
-.congratulations-box {
-  background: linear-gradient(135deg, #1a1a2e, #16213e);
-  border: 3px solid #00ff00;
-  border-radius: 15px;
-  padding: 2rem;
-  text-align: center;
-  box-shadow: 0 0 30px rgba(0, 255, 0, 0.5);
-  animation: celebration 0.5s ease-out;
-}
-
-.congratulations-box h2 {
-  color: #00ff00;
-  font-size: 2.5rem;
-  font-weight: 700;
-  margin: 0 0 1rem 0;
-  text-shadow: 2px 2px 0px #000000;
-}
-
-.congratulations-box p {
-  color: #ffffff;
-  font-size: 1.5rem;
-  margin: 0 0 2rem 0;
-  text-shadow: 1px 1px 0px #000000;
-}
-
-.game-over-box {
-  background: linear-gradient(135deg, #2e1a1a, #3e1616);
-  border: 3px solid #ff6b6b;
-  border-radius: 15px;
-  padding: 2rem;
-  text-align: center;
-  box-shadow: 0 0 30px rgba(255, 107, 107, 0.5);
-  animation: celebration 0.5s ease-out;
-}
-
-.game-over-box h2 {
-  color: #ff6b6b;
-  font-size: 2.5rem;
-  font-weight: 700;
-  margin: 0 0 1rem 0;
-  text-shadow: 2px 2px 0px #000000;
-}
-
-.game-over-box p {
-  color: #ffffff;
-  font-size: 1.2rem;
-  margin: 0 0 1rem 0;
-  text-shadow: 1px 1px 0px #000000;
-}
-
-.restart-button {
-  background: rgba(0, 255, 0, 0.2);
-  border: 2px solid #00ff00;
-  border-radius: 8px;
-  padding: 0.75rem 1.5rem;
-  font-family: 'Pixelify Sans', monospace;
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: #00ff00;
-  text-shadow: 1px 1px 0px #000000;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  margin-right: 1rem;
-}
-
-.restart-button:hover {
-  background: rgba(0, 255, 0, 0.4);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 0px #00ff00;
-}
-
-@keyframes celebration {
-  0% {
-    transform: scale(0.5);
-    opacity: 0;
-  }
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
 
 /* Ensure pixelated rendering */
 * {

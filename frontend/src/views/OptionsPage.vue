@@ -31,7 +31,7 @@
             <router-link to="/play" @click="playSelectSound" class="pixel-nav text-black hover:text-gray-600 transition-colors duration-200">PLAY</router-link>
           </li>
           <li class="flex items-center">
-            <img src="/src/images/right_2885956.png" alt="selected" class="w-6 h-6 mr-2">
+            <img src="/src/icons/right.png" alt="selected" class="w-6 h-6 mr-2">
             <router-link to="/options" @click="playSelectSound" class="pixel-nav text-black hover:text-gray-600 transition-colors duration-200">OPTIONS</router-link>
           </li>
           <li>
@@ -55,7 +55,7 @@ export default {
   },
   methods: {
     playSelectSound() {
-      const audio = new Audio('/src/images/sound/select-sound-121244.mp3')
+      const audio = new Audio('/src/sound/menu-click-89198.mp3')
       audio.volume = 0.5
       audio.play().catch(e => console.log('Audio play failed:', e))
     }
